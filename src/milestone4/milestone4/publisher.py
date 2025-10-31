@@ -50,11 +50,7 @@ class YOLOPublisher(Node):
     """
     _GSTREAMER_PIPELINE = (
         "nvarguscamerasrc ! "
-        "video/x-raw(memory:NVMM), width=(int)1920, height=(int)1080, format=(string)NV12, framerate=(fraction)30/1 ! "
-        "nvvidconv ! "
-        "video/x-raw, format=(string)BGRx ! "
-        "videoconvert ! "
-        "video/x-raw, format=(string)BGR ! "
+        "video/x-raw(memory:NVMM) ! "
         "appsink"
     )
 
@@ -70,7 +66,7 @@ class YOLOPublisher(Node):
         self.capture = cv2.VideoCapture(self._GSTREAMER_PIPELINE, cv2.CAP_GSTREAMER)
         if not self.capture.isOpened():
             raise RuntimeError("Error: Unable to open camera")
-        self.model = YOLO(yolo_model)
+        self.model = YOLO(yolo_model, task="detect")
         self.frame_data = None
 
     def step(self):
