@@ -28,7 +28,7 @@ from .yolo_data import YOLOData
 
 @dataclass
 class FrameData:
-    """Class representing data from a YOLO model."""
+    """Class representing captured image frame data."""
     frame: cv2.Mat
     results: list
     start: float
