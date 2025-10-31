@@ -70,7 +70,7 @@ class YOLOPublisher(Node):
         self.capture = cv2.VideoCapture(self._GSTREAMER_PIPELINE, cv2.CAP_GSTREAMER)
         if not self.capture.isOpened():
             raise RuntimeError("Error: Unable to open camera")
-        self.model = YOLO(model_path)
+        self.model = YOLO(yolo_model)
         self.frame_data = None
 
     def step(self):
