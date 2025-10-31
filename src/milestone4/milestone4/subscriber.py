@@ -17,36 +17,54 @@
 
 import rclpy
 from rclpy.node import Node
-
 from std_msgs.msg import String
 
+import json
 
-class MinimalSubscriber(Node):
+from .yolo_data import YOLOData
+
+
+class YOLOSubscriber(Node):
+    """
+    Subscribes the following information:
+
+        - Bounding box pixel location
+        - Bounding box pixel width
+        - Bounding box pixel height
+        - Class information
+        - Publishing the camera image is optional.
+
+    Data Types: https://docs.ros2.org/foxy/api/std_msgs/index-msg.html
+    """
 
     def __init__(self):
-        super().__init__('minimal_subscriber')
+        super().__init__('yolo_subscriber')
         self.subscription = self.create_subscription(
             String,
-            'topic',
+            'yolo_topic',
             self.listener_callback,
-            10)
-        self.subscription  # prevent unused variable warning
+            10
+        )
 
     def listener_callback(self, msg):
-        self.get_logger().info('I heard: "%s"' % msg.data)
+        try:
+            data = YOLOData(**json.loads(msg.data))
+            self.get_logger().info(f"Received: {str(data)}")
+        except json.JSONDecodeError:
+            self.get_logger().error(f"Failed to decode JSON: {msg.data}")
 
 
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = MinimalSubscriber()
+    yolo_subscriber = YOLOSubscriber()
 
-    rclpy.spin(minimal_subscriber)
+    rclpy.spin(yolo_subscriber)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_subscriber.destroy_node()
+    yolo_subscriber.destroy_node()
     rclpy.shutdown()
 
 

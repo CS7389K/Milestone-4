@@ -17,8 +17,7 @@
 
 import rclpy
 from rclpy.node import Node
-
-from std_msgs.msg import Float64, Int32
+from std_msgs.msg import String
 
 from .yolo_data import YOLOData
 
@@ -41,11 +40,7 @@ class YOLOPublisher(Node):
             publish_period : float = 0.5
         ):
         super().__init__('yolo_publisher')
-        self.bbox_x = self.create_publisher(Float64, 'bbox_x', 10)
-        self.bbox_y = self.create_publisher(Float64, 'bbox_y', 10)
-        self.bbox_w = self.create_publisher(Float64, 'bbox_w', 10)
-        self.bbox_h = self.create_publisher(Float64, 'bbox_h', 10)
-        self.clz = self.create_publisher(Int32, 'clz', 10)
+        self.publisher = self.create_publisher(String, 'yolo_topic', 10)
 
     def publish(
             self,
@@ -58,12 +53,10 @@ class YOLOPublisher(Node):
         assert hasattr(data, 'bbox_h')
         assert hasattr(data, 'clz')
         # Publish data
-        self.bbox_x.publish(Float64(data.bbox_x))
-        self.bbox_y.publish(Float64(data.bbox_y))
-        self.bbox_w.publish(Float64(data.bbox_w))
-        self.bbox_h.publish(Float64(data.bbox_h))
-        self.clz.publish(Int32(data.clz))
-        self.get_logger().info('Publishing: "%s"' % str(data))
+        msg = String()
+        msg.data = json.dumps(data.__dict__)
+        self.publisher.publish(msg)
+        self.get_logger().info('Publishing: "%s"' % str(msg.data))
 
 
 def main(args=None):
