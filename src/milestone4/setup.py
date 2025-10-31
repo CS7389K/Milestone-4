@@ -22,7 +22,6 @@ setup(
         'console_scripts': [
             'talker = milestone4.publisher:main',
             'listener = milestone4.subscriber:main',
-            'backend = milestone4.backend:main'
         ],
     },
 )

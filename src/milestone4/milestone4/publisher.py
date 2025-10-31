@@ -19,7 +19,20 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 
+import cv2
+from dataclasses import dataclass
+from typing import Optional
+
 from .yolo_data import YOLOData
+
+
+@dataclass
+class FrameData:
+    """Class representing data from a YOLO model."""
+    frame: cv2.Mat
+    results: list
+    start: float
+    end: float
 
 
 class YOLOPublisher(Node):
@@ -34,43 +47,79 @@ class YOLOPublisher(Node):
 
     Data Types: https://docs.ros2.org/foxy/api/std_msgs/index-msg.html
     """
-
     def __init__(
             self,
-            publish_period : float = 0.5
+            publish_period : float = 0.5,
+            yolo_model : str = "yolov11n.pt",
+            camera_index : int = 0
         ):
         super().__init__('yolo_publisher')
         self.publisher = self.create_publisher(String, 'yolo_topic', 10)
+        self.timer = self.create_timer(publish_period, self.publish_callback)
+        self.capture = cv2.VideoCapture(camera_index)
+        if not self.capture.isOpened():
+            raise RuntimeError("Error: Unable to open camera")
+        self.model = YOLO(model_path)
+        self.frame_data = None
 
-    def publish(
-            self,
-            data: YOLOData
-        ):
-        # Ensure data has all required attributes
-        assert hasattr(data, 'bbox_x')
-        assert hasattr(data, 'bbox_y')
-        assert hasattr(data, 'bbox_w')
-        assert hasattr(data, 'bbox_h')
-        assert hasattr(data, 'clz')
-        # Publish data
-        msg = String()
-        msg.data = json.dumps(data.__dict__)
-        self.publisher.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % str(msg.data))
+    def step(self):
+        ok, frame = self.capture.read()
+        if not ok:
+            self.frame_data = None
+        else:
+            self.frame_data = FrameData()
+            self.frame_data.frame = frame
+            self.frame_data.start = time.time()
+            self.frame_data.results = self.model(frame)
+            self.frame_data.end = time.time()
+
+    def display(self) -> None:
+        if self.frame_data is not None:
+            annotated_frame = self.frame_data.results[0].plot()
+            fps = 1 / (end - start)
+            cv2.putText(
+                annotated_frame,
+                f"FPS: {fps:.1f}",
+                (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1, 
+                (0, 255, 0), 
+                2
+            )
+            cv2.imshow("YOLOv11 Desktop Demo", annotated_frame)
+
+    def publish_callback(self):
+        if self.frame_data is not None:
+            # Get data from frame_data.results
+            data = self.frame_data.results
+            print(str(data))
+            # Serialize data and publish
+            msg = String()
+            msg.data = json.dumps(data.__dict__)
+            self.publisher.publish(msg)
+            self.get_logger().info('Publishing: "%s"' % str(msg.data))
+
+    def destroy_node(self):
+        self.capture.release()
+        cv2.destroyAllWindows()
+        super().destroy_node()
 
 
 def main(args=None):
     rclpy.init(args=args)
+    node = YOLOPublisher()
 
-    publisher = YOLOPublisher()
-
-    rclpy.spin(publisher)
-
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
-    publisher.destroy_node()
-    rclpy.shutdown()
+    try:
+        while rclpy.ok():
+            node.step()
+            node.display()
+            rclpy.spin_once(node, timeout_sec=0.0)
+            # Wait for key press to break loop: ESC
+            if cv2.waitKey(1) == 27: 
+                break
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 
 if __name__ == '__main__':
