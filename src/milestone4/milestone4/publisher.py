@@ -61,7 +61,7 @@ class YOLOPublisher(Node):
     def __init__(
             self,
             publish_period : float = 0.5,
-            yolo_model : str = "yolov11n.pt",
+            yolo_model : str = "yolov11n.hef",
             camera_index : int = 0
         ):
         super().__init__('yolo_publisher')
