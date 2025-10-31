@@ -3,7 +3,7 @@ from setuptools import setup
 package_name = 'milestone4'
 
 setup(
-    name=milestone4,
+    name=package_name,
     version='0.0.1',
     packages=[package_name],
     data_files=[

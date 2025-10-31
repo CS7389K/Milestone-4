@@ -48,7 +48,7 @@ class YOLOPublisher(Node):
         self.clz = self.create_publisher(Int32, 'clz', 10)
 
     def publish(
-            self
+            self,
             data: YOLOData
         ):
         # Ensure data has all required attributes
