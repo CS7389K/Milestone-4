@@ -2,7 +2,7 @@
 
 In this milestone, you will learn how to use YOLO, a real-time object detection algorithm based on a fully Convolutional Neural Network. YOLO’s input is a camera image fed in real time from a Raspberry Pi v2 camera, and the output would be a bounding box showing which part of the image belongs to which object, with a text label. You will find the tracking accuracy of YOLO to be acceptable, but you will find that labeling may not always be correct. This is because the generic YOLO model is trained on the Microsoft COCO dataset.
 
-## ROS2 Foxy Guides
+## Helpful Guides
 
 ### Foxy
 - [Installation](https://docs.ros.org/en/foxy/Installation/Ubuntu-Install-Debians.html)
