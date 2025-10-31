@@ -22,6 +22,7 @@ from std_msgs.msg import String
 import cv2
 from dataclasses import dataclass
 from typing import Optional
+from ultralytics import YOLO
 
 from .yolo_data import YOLOData
 
