@@ -32,4 +32,5 @@ sh install-ros2-foxy-desktop.sh
 
 ```sh
 sh build.sh
+. install/setup.sh
 ```
