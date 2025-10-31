@@ -47,6 +47,16 @@ class YOLOPublisher(Node):
 
     Data Types: https://docs.ros2.org/foxy/api/std_msgs/index-msg.html
     """
+    _GSTREAMER_PIPELINE = (
+        "nvarguscamerasrc ! "
+        "video/x-raw(memory:NVMM), width=(int)1920, height=(int)1080, format=(string)NV12, framerate=(fraction)30/1 ! "
+        "nvvidconv ! "
+        "video/x-raw, format=(string)BGRx ! "
+        "videoconvert ! "
+        "video/x-raw, format=(string)BGR ! "
+        "appsink"
+    )
+
     def __init__(
             self,
             publish_period : float = 0.5,
@@ -56,7 +66,7 @@ class YOLOPublisher(Node):
         super().__init__('yolo_publisher')
         self.publisher = self.create_publisher(String, 'yolo_topic', 10)
         self.timer = self.create_timer(publish_period, self.publish_callback)
-        self.capture = cv2.VideoCapture(camera_index)
+        self.capture = cv2.VideoCapture(self._GSTREAMER_PIPELINE, cv2.CAP_GSTREAMER)
         if not self.capture.isOpened():
             raise RuntimeError("Error: Unable to open camera")
         self.model = YOLO(model_path)
