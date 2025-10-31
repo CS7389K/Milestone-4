@@ -18,37 +18,65 @@
 import rclpy
 from rclpy.node import Node
 
-from std_msgs.msg import String
+from std_msgs.msg import Float64, Int32
+
+from .yolo_data import YOLOData
 
 
-class MinimalPublisher(Node):
+class YOLOPublisher(Node):
+    """
+    Publishes the following information:
 
-    def __init__(self):
-        super().__init__('minimal_publisher')
-        self.publisher_ = self.create_publisher(String, 'topic', 10)
-        timer_period = 0.5  # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.i = 0
+        - Bounding box pixel location
+        - Bounding box pixel width
+        - Bounding box pixel height
+        - Class information
+        - Publishing the camera image is optional.
 
-    def timer_callback(self):
-        msg = String()
-        msg.data = 'Hello World: %d' % self.i
-        self.publisher_.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
-        self.i += 1
+    Data Types: https://docs.ros2.org/foxy/api/std_msgs/index-msg.html
+    """
+
+    def __init__(
+            self,
+            publish_period : float = 0.5
+        ):
+        super().__init__('yolo_publisher')
+        self.bbox_x = self.create_publisher(Float64, 'bbox_x', 10)
+        self.bbox_y = self.create_publisher(Float64, 'bbox_y', 10)
+        self.bbox_w = self.create_publisher(Float64, 'bbox_w', 10)
+        self.bbox_h = self.create_publisher(Float64, 'bbox_h', 10)
+        self.clz = self.create_publisher(Int32, 'clz', 10)
+
+    def publish(
+            self
+            data: YOLOData
+        ):
+        # Ensure data has all required attributes
+        assert hasattr(data, 'bbox_x')
+        assert hasattr(data, 'bbox_y')
+        assert hasattr(data, 'bbox_w')
+        assert hasattr(data, 'bbox_h')
+        assert hasattr(data, 'clz')
+        # Publish data
+        self.bbox_x.publish(Float64(data.bbox_x))
+        self.bbox_y.publish(Float64(data.bbox_y))
+        self.bbox_w.publish(Float64(data.bbox_w))
+        self.bbox_h.publish(Float64(data.bbox_h))
+        self.clz.publish(Int32(data.clz))
+        self.get_logger().info('Publishing: "%s"' % str(data))
 
 
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_publisher = MinimalPublisher()
+    publisher = YOLOPublisher()
 
-    rclpy.spin(minimal_publisher)
+    rclpy.spin(publisher)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_publisher.destroy_node()
+    publisher.destroy_node()
     rclpy.shutdown()
 
 
