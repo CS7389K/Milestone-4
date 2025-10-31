@@ -4,8 +4,12 @@ In this milestone, you will learn how to use YOLO, a real-time object detection 
 
 ## ROS2 Foxy Guides
 
+### Foxy
 - [Installation](https://docs.ros.org/en/foxy/Installation/Ubuntu-Install-Debians.html)
 - [Building Packages](https://docs.ros.org/en/foxy/Tutorials/Beginner-Client-Libraries/Colcon-Tutorial.html)
+- [Publisher/Subscriber](https://docs.ros.org/en/foxy/Tutorials/Beginner-Client-Libraries/Writing-A-Simple-Py-Publisher-And-Subscriber.html)
+
+### Ultralytics
 - [YOLO](https://docs.ultralytics.com/)
 
 ## Development Environment
