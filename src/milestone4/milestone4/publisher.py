@@ -51,10 +51,7 @@ class YOLOPublisher(Node):
 
     Data Types: https://docs.ros2.org/foxy/api/std_msgs/index-msg.html
     """
-    _GSTREAMER_PIPELINE = "nvarguscamerasrc sensor-mode=4 ! " \
-        "nvvidconv ! " \
-        "video/x-raw(memory:NVMM)" \
-        "appsink"
+    _GSTREAMER_PIPELINE =  'nvarguscamerasrc sensor-id=0 ! video/x-raw(memory:NVMM), width=500, height=320, framerate=30/1, format=NV12 ! nvvidconv ! video/x-raw,format=BGRx,width=500,height=320 ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1'
 
     def __init__(
             self,
